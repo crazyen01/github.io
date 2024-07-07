@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelime Bağlama Oyunu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #83a4d4, #b6fbff);
+        }
+
+        #game-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 340px;
+            height: 680px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #main-menu, #level-select, #game-screen, #how-to-play-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .button {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 12px 24px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 200px;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .level-button {
+            width: 80%;
+            margin: 10px 0;
+        }
+
+        #logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 20px;
+        }
+
+        #hint-image {
+            width: 280px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        #word-display {
+            font-size: 28px;
+            font-weight: 600;
+            margin: 20px 0;
+            min-height: 50px;
+            background-color: #f0f0f0;
+            border-radius: 25px;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #letter-container {
+            display: flex;
+            justify-content: space-between;
+            flex-grow: 1;
+            margin-top: 20px;
+        }
+
+        .letter-column {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .letter {
+            width: 70px;
+            height: 50px;
+            font-size: 26px;
+            font-weight: 600;
+            border: none;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            background-color: #e0e0e0;
+            color: #333;
+            transition: all 0.3s ease;
+            margin: 5px auto;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .letter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+
+        .letter.selected {
+            background-color: #4CAF50;
+            color: white;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .letter.hidden {
+            visibility: hidden;
+        }
+
+        #level-info {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="main-menu">
+            <img id="logo" src="https://placehold.co/150x150?text=Logo" alt="Oyun Logosu">
+            <h1>Kelime Bağlama Oyunu</h1>
+            <button id="start-game" class="button">Oyunu Başlat</button>
+            <button id="select-level" class="button">Seviye Seç</button>
+            <button id="how-to-play" class="button">Nasıl Oynanır?</button>
+        </div>
+
+        <div id="level-select" style="display: none;">
+            <h1>Seviye Seçin</h1>
+            <button class="button level-button" data-level="1">Seviye 1</button>
+            <button class="button level-button" data-level="2">Seviye 2</button>
+            <button class="button level-button" data-level="3">Seviye 3</button>
+            <button id="back-to-menu" class="button">Ana Menüye Dön</button>
+        </div>
+
+        <div id="game-screen" style="display: none;">
+            <div id="level-info">Seviye 1</div>
+            <img id="hint-image" src="" alt="İpucu Görseli">
+            <div id="word-display"></div>
+            <div id="letter-container">
+                <div class="letter-column" id="left-column"></div>
+                <div class="letter-column" id="right-column"></div>
+            </div>
+            <button id="pause-game" class="button">Oyunu Durdur</button>
+        </div>
+
+        <div id="how-to-play-screen" style="display: none;">
+            <h1>Nasıl Oynanır?</h1>
+            <p>1. Ekrandaki harfleri sırayla seçerek kelime oluşturun.</p>
+            <p>2. Doğru kelimeyi bulduğunuzda bir sonraki seviyeye geçersiniz.</p>
+            <p>3. Tüm seviyeleri tamamlamaya çalışın!</p>
+            <button id="back-to-menu-how" class="button">Ana Menüye Dön</button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            {
+                words: ["KOPEK", "YEMEK", "PARKE", "ACIKMAK", "BENEK"],
+                image: "https://iams.eu/fileadmin/_processed_/e/2/csm_Dog_dry_food_SEO_02_02edc00b73.jpg"
+            },
+            {
+                words: ["KITAP", "OKUL", "KALEM", "DEFTER", "SINIF"],
+                image: "https://st.depositphotos.com/1000260/1224/i/450/depositphotos_12242296-stock-photo-school-child-with-teacher.jpg"
+            },
+            {
+                words: ["ELMA", "ARMUT", "KIRAZ", "UZUM", "SEFTALI"],
+                image: "https://img.memurlar.net/galeri/10683/1030b0c7-2e09-e611-80c6-a0369f7d1486.jpg?width=800"
+            }
+        ];
+
+        let currentLevel;
+        let currentWordIndex = 0;
+        let currentWord;
+        let selectedLetters = [];
+        let isSelecting = false;
+
+        const mainMenu = document.getElementById('main-menu');
+        const levelSelect = document.getElementById('level-select');
+        const gameScreen = document.getElementById('game-screen');
+        const howToPlayScreen = document.getElementById('how-to-play-screen');
+        const startGameButton = document.getElementById('start-game');
+        const selectLevelButton = document.getElementById('select-level');
+        const howToPlayButton = document.getElementById('how-to-play');
+        const backToMenuButton = document.getElementById('back-to-menu');
+        const backToMenuHowButton = document.getElementById('back-to-menu-how');
+        const levelButtons = document.querySelectorAll('.level-button');
+        const pauseGameButton = document.getElementById('pause-game');
+        const hintImage = document.getElementById('hint-image');
+        const wordDisplay = document.getElementById('word-display');
+        const leftColumn = document.getElementById('left-column');
+        const rightColumn = document.getElementById('right-column');
+        const levelInfo = document.getElementById('level-info');
+
+        function showScreen(screen) {
+            mainMenu.style.display = 'none';
+            levelSelect.style.display = 'none';
+            gameScreen.style.display = 'none';
+            howToPlayScreen.style.display = 'none';
+            screen.style.display = 'flex';
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initGame(levelIndex = 0) {
+            currentLevel = levels[levelIndex];
+            currentWordIndex = 0;
+            levelInfo.textContent = `Seviye ${levelIndex + 1}`;
+            nextWord();
+        }
+
+        function nextWord() {
+            if (currentWordIndex >= currentLevel.words.length) {
+                alert("Tebrikler! Bu seviyeyi tamamladınız!");
+                showScreen(mainMenu);
+                return;
+            }
+
+            currentWord = currentLevel.words[currentWordIndex];
+            hintImage.src = currentLevel.image;
+            
+            leftColumn.innerHTML = '';
+            rightColumn.innerHTML = '';
+            
+            let letters = currentWord.split('');
+            letters = shuffleArray(letters);
+
+            letters.forEach((letter, index) => {
+                const letterElement = document.createElement('div');
+                letterElement.className = 'letter';
+                letterElement.textContent = letter;
+                letterElement.addEventListener('mousedown', startSelection);
+                letterElement.addEventListener('mouseover', selectLetter);
+
+                if (index % 2 === 0) {
+                    leftColumn.appendChild(letterElement);
+                } else {
+                    rightColumn.appendChild(letterElement);
+                }
+            });
+
+            selectedLetters = [];
+            isSelecting = false;
+            updateWordDisplay();
+        }
+
+        function startSelection(e) {
+            isSelecting = true;
+            selectLetter(e);
+            document.addEventListener('mouseup', endSelection);
+        }
+
+        function selectLetter(e) {
+            if (!isSelecting) return;
+            const letter = e.target;
+            if (letter.classList.contains('letter') && !selectedLetters.includes(letter)) {
+                selectedLetters.push(letter);
+                letter.classList.add('selected');
+                updateWordDisplay();
+            }
+        }
+
+        function endSelection() {
+            isSelecting = false;
+            checkWord();
+            document.removeEventListener('mouseup', endSelection);
+        }
+
+        function updateWordDisplay() {
+            const word = selectedLetters.map(l => l.textContent).join('');
+            wordDisplay.textContent = word;
+        }
+
+        function checkWord() {
+            const formedWord = selectedLetters.map(l => l.textContent).join('');
+            if (formedWord === currentWord) {
+                currentWordIndex++;
+                setTimeout(() => {
+                    nextWord();
+                }, 500);
+            } else {
+                resetSelection();
+            }
+        }
+
+        function resetSelection() {
+            selectedLetters.forEach(letter => letter.classList.remove('selected'));
+            selectedLetters = [];
+            updateWordDisplay();
+        }
+
+        startGameButton.addEventListener('click', () => {
+            initGame(0);
+            showScreen(gameScreen);
+        });
+
+        selectLevelButton.addEventListener('click', () => {
+            showScreen(levelSelect);
+        });
+
+        howToPlayButton.addEventListener('click', () => {
+            showScreen(howToPlayScreen);
+        });
+
+        backToMenuButton.addEventListener('click', () => {
+            showScreen(mainMenu);
+        });
+
+        backToMenuHowButton.addEventListener('click', () => {
+            showScreen(mainMenu);
+        });
+
+        levelButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const level = parseInt(e.target.getAttribute('data-level')) - 1;
+                initGame(level);
+                showScreen(gameScreen);
+            });
+        });
+
+        pauseGameButton.addEventListener('click', () => {
+            showScreen(mainMenu);
+        });
+
+    </script>
+</body>
+</html>
